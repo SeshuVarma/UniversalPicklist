@@ -1,0 +1,97 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" 
+                controller='UniversalPicklistController' access="global" >
+    
+    <aura:handler name="init" value="{!this}" action="{!c.loadData}"/>
+    
+    <aura:attribute name="selectedAction" type="String" />
+    <aura:attribute name="selectedObject" type="String" />
+    <aura:attribute name="selectedPicklistValue" type="String" />
+    
+    <aura:attribute name="picklists" type="String[]" />
+    <aura:attribute name="listOfPicklistFields" type="List" />
+    <aura:attribute name="listOfPicklistValues" type="List" />
+    
+    <aura:attribute name="picklistFieldSelected" type="String" />
+    <aura:attribute name="picklistValueSelected" type="String" />
+    
+    <aura:attribute name="listOfObjectNames" type="List" />
+    <aura:attribute name="listOfAvailableRecordTypes" type="List" />
+    <aura:attribute name="listOfSelectedRecordTypes" type="List" />
+    
+    <aura:attribute name="mapOfObjectNamesAndFieldNames" type="List" />
+    
+    <aura:attribute name="disablePicklistValue" type="Boolean" default="true"/>
+    <aura:attribute name="disableAction" type="Boolean" default="true"/>
+    <aura:attribute name="disableFields" type="Boolean" default="true"/>
+    <aura:attribute name="displayAvailableAndSelectedRecordTypes" type="Boolean" default="false"/>
+    <aura:attribute name="spinner" type="boolean" default="false"/>
+    <aura:attribute name="valueInTheDescription" type="String"/>
+    
+    <aura:attribute name="lstOfMap" type="List"/>
+    
+    <div class="slds-box  slds-theme_default">
+        <div class="slds-m-top_medium">
+            <lightning:select class="fds-max-width slds-m-top_medium" aura:id="objectName" name="objectName" label="Object Name" onchange="{!c.fetchPicklistFields}">
+                <option text="-- None --"></option>
+                <aura:iteration items="{!v.listOfObjectNames}" var="objectName">
+                    <option value="{!objectName}" text="{!objectName}"></option>
+                </aura:iteration>
+            </lightning:select>
+            
+            <lightning:select aura:id="picklistFieldSelected" class="fds-max-width slds-m-top_medium" name="picklistField" label="Picklist:" required="false" onchange="{!c.fetchPicklistValues }" disabled="{!v.disableFields}">
+                <option value="" text="-- None --"></option>
+                <aura:iteration items="{!v.listOfPicklistFields}" var="picklistField">
+                    <option value="{!picklistField.value}" text="{!picklistField.label}"></option>
+                </aura:iteration>
+            </lightning:select>
+            
+            <lightning:select class="fds-max-width slds-m-top_medium" aura:id="action" name="action" label="Action:" value="{!v.selectedAction}" onchange="{!c.getRecordTypes}" disabled="{!v.disableAction}">
+                <option value="">Choose one...</option>
+                <option value="Create">Create</option>
+                <option value="Update">Update</option>
+            </lightning:select>
+            
+            <!--Loading spinner start--> 
+            <aura:if isTrue="{!v.spinner}">
+                <div class="loadingSpinner">
+                    <lightning:spinner alternativeText="Loading" size="medium"/>
+                </div>
+            </aura:if>
+            <!--Loading spinner end--> 
+            
+            <aura:if isTrue="{!v.selectedAction == 'Create'}">
+                <lightning:dualListbox aura:id="recordTypes" name="recordTypes" label="Select RecordTypes" 
+                                       sourceLabel="Available Options" 
+                                       selectedLabel="Selected Options" 
+                                       options="{!v.listOfAvailableRecordTypes}" 
+                                       value="{!v.listOfSelectedRecordTypes}"
+                                       />
+            </aura:if>
+            
+            <lightning:select class="fds-max-width slds-m-top_medium" name="picklistValue" label="Picklist Value to Update:" required="false" value="{!v.picklistValueSelected}" 
+                              disabled="{!v.disablePicklistValue}" onchange="{!c.fetchRecordTypesOfSelectedValue }">
+                <option value="" text="-- None --"></option>
+                <aura:iteration items="{!v.listOfPicklistValues}" var="picklistValue">
+                    <option text="{!picklistValue}"></option>
+                </aura:iteration>
+            </lightning:select>
+            
+            <aura:if isTrue="{!v.displayAvailableAndSelectedRecordTypes}">
+                <lightning:dualListbox aura:id="recordTypesForUpdate" name="recordTypesForUpdate" label="Select RecordTypes" 
+                                       sourceLabel="Available Options" 
+                                       selectedLabel="Selected Options" 
+                                       options="{!v.listOfAvailableRecordTypes}" 
+                                       value="{!v.listOfSelectedRecordTypes}"
+                                       />
+            </aura:if>
+            
+            <div class="row">
+                <lightning:input class="fds-max-width slds-m-top_medium" name="description" label="Description:"
+                                 value="{!v.valueInTheDescription}"/>
+            </div>  
+            <div class="slds-m-top_x-large slds-m-bottom_xx-large">
+                <lightning:button variant="success" label="Save" title="Success" onclick="{!c.onSave}"/>
+            </div>
+        </div>
+    </div>
+</aura:component>
